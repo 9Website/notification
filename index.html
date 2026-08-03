@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Desktop Notification Scheduler</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"], select, input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            margin-top: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .status-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .permission-notice {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Desktop Notification Scheduler</h1>
+    <p class="subtitle">Triggers real system notifications in your computer's corner.</p>
+
+    <div class="form-group">
+        <label for="messageInput">Notification Message</label>
+        <input type="text" id="messageInput" placeholder="e.g., Look away from the screen!" value="Time to take a quick break!">
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="intervalValue">Every</label>
+            <input type="number" id="intervalValue" min="1" value="5">
+        </div>
+        <div class="form-group">
+            <label for="intervalUnit">Time Unit</label>
+            <select id="intervalUnit">
+                <option value="seconds">Seconds</option>
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="startBtn" class="btn btn-primary">Start Desktop Notifications</button>
+    <button id="stopBtn" class="btn btn-danger" style="display: none;">Stop Notifications</button>
+
+    <div class="permission-notice">Note: Your browser will prompt you to "Allow" notifications the first time you click start.</div>
+
+    <div class="status-box">
+        Status: <span id="statusText" style="color: var(--text-muted);">Inactive</span>
+    </div>
+</div>
+
+<script>
+    let activeTimer = null;
+    let count = 0;
+
+    const messageInput = document.getElementById('messageInput');
+    const intervalValue = document.getElementById('intervalValue');
+    const intervalUnit = document.getElementById('intervalUnit');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusText = document.getElementById('statusText');
+
+    startBtn.addEventListener('click', () => {
+        // Check if browser supports system notifications
+        if (!("Notification" in window)) {
+            alert("This browser does not support desktop system notifications.");
+            return;
+        }
+
+        // If permission isn't granted yet, request it first
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    startScheduler();
+                } else {
+                    alert("Permission denied. You must allow notifications in your browser address bar to use this.");
+                }
+            });
+        } else {
+            startScheduler();
+        }
+    });
+
+    function startScheduler() {
+        const message = messageInput.value.trim() || "Reminder!";
+        const val = parseInt(intervalValue.value);
+
+        if (isNaN(val) || val <= 0) {
+            alert("Please enter a valid number greater than 0.");
+            return;
+        }
+
+        // Calculate interval in milliseconds
+        let ms = val * 1000; // seconds
+        const unit = intervalUnit.value;
+        if (unit === 'minutes') ms = val * 60 * 1000;
+        if (unit === 'hours') ms = val * 60 * 60 * 1000;
+        if (unit === 'days') ms = val * 24 * 60 * 60 * 1000;
+
+        // Lock inputs & toggle buttons
+        messageInput.disabled = true;
+        intervalValue.disabled = true;
+        intervalUnit.disabled = true;
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'block';
+        
+        statusText.textContent = `Active (Firing every ${val} ${unit})`;
+        statusText.className = "status-active";
+
+        // Trigger immediately, then set interval
+        fireDesktopNotification(message);
+
+        activeTimer = setInterval(() => {
+            fireDesktopNotification(message);
+        }, ms);
+    }
+
+    stopBtn.addEventListener('click', () => {
+        clearInterval(activeTimer);
+        activeTimer = null;
+
+        // Unlock inputs & toggle buttons
+        messageInput.disabled = false;
+        intervalValue.disabled = false;
+        intervalUnit.disabled = false;
+        startBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+
+        statusText.textContent = "Inactive";
+        statusText.className = "";
+    });
+
+    function fireDesktopNotification(text) {
+        count++;
+        // This triggers the actual OS-level notification card pop-up
+        new Notification(`Reminder #${count}`, {
+            body: text,
+            tag: 'custom-scheduler' // prevents notification stacking clutter in some OSs
+        });
+    }
+</script>
+
+</body>
+</html>
