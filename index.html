@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Desktop Notification Scheduler</title>
+    <title>Work Enforcement Spammer</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --bg: #090d16;
+            --card-bg: #111827;
+            --text: #f3f4f6;
+            --danger: #dc2626;
+            --success: #16a34a;
         }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 2rem 1rem;
+            padding: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,243 +27,146 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             background-color: var(--card-bg);
-            border: 1px solid var(--border);
+            border: 2px solid #374151;
             border-radius: 1rem;
             padding: 2rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            margin-bottom: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
             text-align: center;
         }
 
-        p.subtitle {
-            color: var(--text-muted);
-            text-align: center;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        input[type="text"], select, input[type="number"] {
+        input {
             width: 100%;
             padding: 0.75rem;
-            background-color: var(--bg);
-            border: 1px solid var(--border);
+            background: #1f2937;
+            border: 1px solid #4b5563;
             border-radius: 0.5rem;
-            color: var(--text);
+            color: white;
             font-size: 1rem;
+            margin-bottom: 1rem;
             box-sizing: border-box;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .row {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .row .form-group {
-            flex: 1;
         }
 
         .btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 1rem;
             border: none;
             border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
+        .btn-start { background-color: var(--danger); color: white; }
+        .btn-stop { background-color: var(--success); color: white; display: none; }
+
+        /* Full screen flashing alert mode */
+        body.flash-mode {
+            animation: flashBg 0.5s infinite alternate;
+        }
+
+        @keyframes flashBg {
+            from { background-color: var(--bg); }
+            to { background-color: #7f1d1d; }
+        }
+
+        .popup-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
             color: white;
-            margin-top: 0.5rem;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-            margin-top: 0.5rem;
-        }
-
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-
-        .status-box {
-            margin-top: 1.5rem;
-            padding: 1rem;
+            padding: 1rem 2rem;
             border-radius: 0.5rem;
-            background-color: var(--bg);
-            border: 1px solid var(--border);
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .status-active {
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .permission-notice {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 0.75rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
         }
     </style>
 </head>
 <body>
 
+<div id="topAlert" class="popup-alert">GET BACK TO WORK!</div>
+
 <div class="container">
-    <h1>Desktop Notification Scheduler</h1>
-    <p class="subtitle">Triggers real system notifications in your computer's corner.</p>
+    <h2>Work Enforcer</h2>
+    <p style="color: #9ca3af; font-size: 0.9rem;">Bypasses browser limits by flashing and locking your attention directly on screen.</p>
 
-    <div class="form-group">
-        <label for="messageInput">Notification Message</label>
-        <input type="text" id="messageInput" placeholder="e.g., Look away from the screen!" value="Time to take a quick break!">
-    </div>
+    <label style="text-align: left; display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.4rem;">What should it yell at you?</label>
+    <input type="text" id="msg" value="DO YOUR WORK NOW!">
 
-    <div class="row">
-        <div class="form-group">
-            <label for="intervalValue">Every</label>
-            <input type="number" id="intervalValue" min="1" value="5">
-        </div>
-        <div class="form-group">
-            <label for="intervalUnit">Time Unit</label>
-            <select id="intervalUnit">
-                <option value="seconds">Seconds</option>
-                <option value="minutes">Minutes</option>
-                <option value="hours">Hours</option>
-                <option value="days">Days</option>
-            </select>
-        </div>
-    </div>
+    <label style="text-align: left; display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.4rem;">Interval (Seconds)</label>
+    <input type="number" id="sec" value="3" min="1">
 
-    <button id="startBtn" class="btn btn-primary">Start Desktop Notifications</button>
-    <button id="stopBtn" class="btn btn-danger" style="display: none;">Stop Notifications</button>
-
-    <div class="permission-notice">Note: Your browser will prompt you to "Allow" notifications the first time you click start.</div>
-
-    <div class="status-box">
-        Status: <span id="statusText" style="color: var(--text-muted);">Inactive</span>
-    </div>
+    <button id="startBtn" class="btn btn-start" onclick="startSpam()">START SPAMMING</button>
+    <button id="stopBtn" class="btn btn-stop" onclick="stopSpam()">STOP (I'M WORKING)</button>
 </div>
 
 <script>
-    let activeTimer = null;
-    let count = 0;
+    let timer = null;
 
-    const messageInput = document.getElementById('messageInput');
-    const intervalValue = document.getElementById('intervalValue');
-    const intervalUnit = document.getElementById('intervalUnit');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const statusText = document.getElementById('statusText');
-
-    startBtn.addEventListener('click', () => {
-        // Check if browser supports system notifications
-        if (!("Notification" in window)) {
-            alert("This browser does not support desktop system notifications.");
-            return;
-        }
-
-        // If permission isn't granted yet, request it first
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    startScheduler();
-                } else {
-                    alert("Permission denied. You must allow notifications in your browser address bar to use this.");
-                }
-            });
-        } else {
-            startScheduler();
-        }
-    });
-
-    function startScheduler() {
-        const message = messageInput.value.trim() || "Reminder!";
-        const val = parseInt(intervalValue.value);
-
-        if (isNaN(val) || val <= 0) {
-            alert("Please enter a valid number greater than 0.");
-            return;
-        }
-
-        // Calculate interval in milliseconds
-        let ms = val * 1000; // seconds
-        const unit = intervalUnit.value;
-        if (unit === 'minutes') ms = val * 60 * 1000;
-        if (unit === 'hours') ms = val * 60 * 60 * 1000;
-        if (unit === 'days') ms = val * 24 * 60 * 60 * 1000;
-
-        // Lock inputs & toggle buttons
-        messageInput.disabled = true;
-        intervalValue.disabled = true;
-        intervalUnit.disabled = true;
-        startBtn.style.display = 'none';
-        stopBtn.style.display = 'block';
+    function startSpam() {
+        const seconds = parseInt(document.getElementById('sec').value) || 3;
+        const text = document.getElementById('msg').value;
         
-        statusText.textContent = `Active (Firing every ${val} ${unit})`;
-        statusText.className = "status-active";
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'block';
+        document.getElementById('sec').disabled = true;
+        document.getElementById('msg').disabled = true;
 
-        // Trigger immediately, then set interval
-        fireDesktopNotification(message);
-
-        activeTimer = setInterval(() => {
-            fireDesktopNotification(message);
-        }, ms);
+        timer = setInterval(() => {
+            triggerChaos(text);
+        }, seconds * 1000);
     }
 
-    stopBtn.addEventListener('click', () => {
-        clearInterval(activeTimer);
-        activeTimer = null;
+    function triggerChaos(text) {
+        // Flash background
+        document.body.classList.add('flash-mode');
+        
+        // Show giant banner
+        const alertBox = document.getElementById('topAlert');
+        alertBox.textContent = text;
+        alertBox.style.display = 'block';
 
-        // Unlock inputs & toggle buttons
-        messageInput.disabled = false;
-        intervalValue.disabled = false;
-        intervalUnit.disabled = false;
-        startBtn.style.display = 'block';
-        stopBtn.style.display = 'none';
+        // Play a quick beep sound using web audio API (no external files needed)
+        playBeep();
 
-        statusText.textContent = "Inactive";
-        statusText.className = "";
-    });
+        // Turn off flash after 1 second so it doesn't cause a seizure, but keeps cycling
+        setTimeout(() => {
+            document.body.classList.remove('flash-mode');
+            alertBox.style.display = 'none';
+        }, 1500);
+    }
 
-    function fireDesktopNotification(text) {
-        count++;
-        // This triggers the actual OS-level notification card pop-up
-        new Notification(`Reminder #${count}`, {
-            body: text,
-            tag: 'custom-scheduler' // prevents notification stacking clutter in some OSs
-        });
+    function playBeep() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.value = 440; // Pitch
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            setTimeout(() => { osc.stop(); }, 300);
+        } catch (e) {
+            // Audio context blocked if user hasn't interacted, ignore safely
+        }
+    }
+
+    function stopSpam() {
+        clearInterval(timer);
+        document.body.classList.remove('flash-mode');
+        document.getElementById('topAlert').style.display = 'none';
+        
+        document.getElementById('startBtn').style.display = 'block';
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('sec').disabled = false;
+        document.getElementById('msg').disabled = false;
     }
 </script>
 
